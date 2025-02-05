@@ -163,7 +163,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 For questions, feedback, or collaboration:
 - GitHub: [@fahad0samara](https://github.com/fahad0samara)
-- Email: [your.email@example.com]
+
 
 ---
 ⭐ Don't forget to star this repository if you found it helpful!
