@@ -5,10 +5,10 @@ import plotly.express as px
 import plotly.graph_objects as go
 import joblib
 
-# Load the trained model and encoders
+# Load the trained model
 model = joblib.load('model.pkl')
 
-# Pre-calculated statistics from training data
+# Pre-calculated statistics
 PRICE_STATS = {
     'min_price': 10.0,
     'max_price': 2000.0,
@@ -17,28 +17,30 @@ PRICE_STATS = {
 
 # Feature descriptions
 FEATURE_DESCRIPTIONS = {
-    'Size': 'Physical dimensions of the bag',
-    'Weight_Capacity': 'Maximum load the bag can carry',
-    'Laptop_Pocket': 'Dedicated laptop protection',
-    'Water_Resistance': 'Protection from water damage',
-    'Color': 'Bag color and finish',
     'Brand': 'Manufacturer reputation',
     'Material': 'Main fabric or material used',
+    'size_numeric': 'Physical dimensions of the bag',
+    'Compartments': 'Number of storage sections',
+    'Laptop Compartment': 'Dedicated laptop protection',
+    'Waterproof': 'Protection from water damage',
     'Style': 'Bag design and type',
-    'Premium_Features': 'Additional luxury features'
+    'Color': 'Bag color and finish',
+    'Weight Capacity (kg)': 'Maximum load the bag can carry',
+    'premium_features': 'Combined score of special features'
 }
 
 # Feature importance scores (pre-calculated)
 FEATURE_IMPORTANCE = {
-    'Size': 0.85,
-    'Weight_Capacity': 0.75,
-    'Laptop_Pocket': 0.65,
-    'Water_Resistance': 0.60,
-    'Color': 0.45,
     'Brand': 0.80,
     'Material': 0.70,
+    'size_numeric': 0.85,
+    'Compartments': 0.50,
+    'Laptop Compartment': 0.65,
+    'Waterproof': 0.60,
     'Style': 0.55,
-    'Premium_Features': 0.50
+    'Color': 0.45,
+    'Weight Capacity (kg)': 0.75,
+    'premium_features': 0.50
 }
 
 def main():
@@ -49,7 +51,7 @@ def main():
         initial_sidebar_state="expanded"
     )
 
-    # Custom CSS for dark theme
+    # Custom CSS
     st.markdown("""
     <style>
     .stApp {
@@ -86,32 +88,41 @@ def main():
             with st.form("prediction_form"):
                 st.markdown("<h3 style='color: #4a9eff;'>🔍 Bag Specifications</h3>", unsafe_allow_html=True)
 
-                # Input fields with predefined options
-                size = st.selectbox('Size', ['Small', 'Medium', 'Large'])
-                weight_capacity = st.selectbox('Weight Capacity', ['Light', 'Medium', 'Heavy'])
-                laptop_pocket = st.selectbox('Laptop Pocket', ['No', 'Yes'])
-                water_resistance = st.selectbox('Water Resistance', ['None', 'Water Resistant', 'Waterproof'])
-                color = st.selectbox('Color', ['Black', 'Blue', 'Brown', 'Grey', 'Other'])
+                # Input fields matching training data exactly
                 brand = st.selectbox('Brand', ['Budget', 'Mid-Range', 'Premium'])
                 material = st.selectbox('Material', ['Canvas', 'Leather', 'Nylon', 'Polyester', 'Other'])
+                size = st.selectbox('Size', ['Small', 'Medium', 'Large'])
+                compartments = st.selectbox('Compartments', [1, 2, 3, 4, 5])
+                laptop_compartment = st.selectbox('Laptop Compartment', ['No', 'Yes'])
+                waterproof = st.selectbox('Waterproof', ['No', 'Yes'])
                 style = st.selectbox('Style', ['Casual', 'Business', 'Sport', 'Travel'])
-                premium_features = st.selectbox('Premium Features', ['None', 'Basic', 'Advanced', 'Premium'])
+                color = st.selectbox('Color', ['Black', 'Blue', 'Brown', 'Grey', 'Other'])
+                weight_capacity = st.selectbox('Weight Capacity (kg)', [5, 10, 15, 20, 25])
 
                 submitted = st.form_submit_button("Calculate Price 💫")
 
                 if submitted:
                     try:
-                        # Prepare input data with numerical encoding
+                        # Convert inputs to match training data format
+                        size_numeric = {'Small': 1, 'Medium': 2, 'Large': 3}[size]
+                        laptop_comp_numeric = {'No': 0, 'Yes': 1}[laptop_compartment]
+                        waterproof_numeric = {'No': 0, 'Yes': 1}[waterproof]
+                        
+                        # Calculate premium_features as in training
+                        premium_features = laptop_comp_numeric + waterproof_numeric
+
+                        # Prepare input data matching training features exactly
                         input_data = pd.DataFrame({
-                            'Size': [{'Small': 0, 'Medium': 1, 'Large': 2}[size]],
-                            'Weight_Capacity': [{'Light': 0, 'Medium': 1, 'Heavy': 2}[weight_capacity]],
-                            'Laptop_Pocket': [{'No': 0, 'Yes': 1}[laptop_pocket]],
-                            'Water_Resistance': [{'None': 0, 'Water Resistant': 1, 'Waterproof': 2}[water_resistance]],
-                            'Color': [{'Black': 0, 'Blue': 1, 'Brown': 2, 'Grey': 3, 'Other': 4}[color]],
                             'Brand': [{'Budget': 0, 'Mid-Range': 1, 'Premium': 2}[brand]],
                             'Material': [{'Canvas': 0, 'Leather': 1, 'Nylon': 2, 'Polyester': 3, 'Other': 4}[material]],
+                            'size_numeric': [size_numeric],
+                            'Compartments': [compartments],
+                            'Laptop Compartment': [laptop_comp_numeric],
+                            'Waterproof': [waterproof_numeric],
                             'Style': [{'Casual': 0, 'Business': 1, 'Sport': 2, 'Travel': 3}[style]],
-                            'Premium_Features': [{'None': 0, 'Basic': 1, 'Advanced': 2, 'Premium': 3}[premium_features]]
+                            'Color': [{'Black': 0, 'Blue': 1, 'Brown': 2, 'Grey': 3, 'Other': 4}[color]],
+                            'Weight Capacity (kg)': [float(weight_capacity)],
+                            'premium_features': [premium_features]
                         })
 
                         # Make prediction
