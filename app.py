@@ -383,14 +383,8 @@ with tab1:
                     """, unsafe_allow_html=True)
         
         except Exception as e:
-            st.error(f"""
-            <div style='background-color: #ffdce0; padding: 15px; border-radius: 10px; margin-top: 20px;'>
-                <h4 style='color: #dc3545; margin: 0;'>❌ Error</h4>
-                <p style='margin: 10px 0;'>{str(e)}</p>
-                <p style='margin: 0;'>Please try different input values.</p>
-            </div>
-            """, unsafe_allow_html=True)
-
+            st.error("❌ Error: " + str(e) + "\nPlease try different input values.")
+        
 with tab2:
     st.title("📊 Market Analysis Dashboard")
     
