@@ -35,10 +35,6 @@ env/
 # Jupyter Notebook
 .ipynb_checkpoints
 
-# Model files
-*.pkl
-*.h5
-
 # Logs
 *.log
 
